@@ -83,9 +83,27 @@ app.post("/v1/messages", (req, res) => {
 					})
 					.join("\n\n");
 
-				// 只保留最后一条用户消息
+				// 对于多条消息，只保留最后一条用户消息传入 chat，其他作为文件上传
 				if(userMessage.length > 1) {
 					userMessage = userMessage.slice(-1);
+
+					// GET https://you.com/api/get_nonce to get nonce
+					let nonce = await axios("https://you.com/api/get_nonce").then((res) => res.data);
+					if (!nonce) throw new Error("Failed to get nonce");
+
+					// POST https://you.com/api/upload to upload user message
+					const form_data = new FormData();
+					var messageBuffer = Buffer.from(previousMessages, "utf8");
+					form_data.append("file", messageBuffer, { filename: "Previous_Conversation.txt", contentType: "text/plain" });
+					var uploadedFile = await axios
+						.post("https://you.com/api/upload", form_data, {
+							headers: {
+								...form_data.getHeaders(),
+								"X-Upload-Nonce": nonce,
+							},
+						})
+						.then((res) => res.data.filename);
+					if (!uploadedFile) throw new Error("Failed to upload messages");
 				}
 
 				let msgid = uuidv4();
@@ -109,23 +127,7 @@ app.post("/v1/messages", (req, res) => {
 				res.write(createEvent("content_block_start", { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } }));
 				res.write(createEvent("ping", { type: "ping" }));
 
-				// GET https://you.com/api/get_nonce to get nonce
-				let nonce = await axios("https://you.com/api/get_nonce").then((res) => res.data);
-				if (!nonce) throw new Error("Failed to get nonce");
-
-				// POST https://you.com/api/upload to upload user message
-				const form_data = new FormData();
-				messageBuffer = Buffer.from(previousMessages, "utf8");
-				form_data.append("file", messageBuffer, { filename: "Previous_Conversation.txt", contentType: "text/plain" });
-				let uploadedFile = await axios
-					.post("https://you.com/api/upload", form_data, {
-						headers: {
-							...form_data.getHeaders(),
-							"X-Upload-Nonce": nonce,
-						},
-					})
-					.then((res) => res.data.filename);
-				if (!uploadedFile) throw new Error("Failed to upload messages");
+				
 
 				// proxy response
 				let youcom_params = new URLSearchParams();
@@ -145,16 +147,18 @@ app.post("/v1/messages", (req, res) => {
 				youcom_params.append("domain", "youchat");
 				youcom_params.append("responseFilter", "");
 				youcom_params.append("mkt", "zh-CN");
-				youcom_params.append(
-					"userFiles",
-					JSON.stringify([
-						{
-							user_filename: "Previous_Conversation.txt",
-							filename: uploadedFile,
-							size: messageBuffer.length,
-						},
-					])
-				);
+				if(uploadedFile){
+					youcom_params.append(
+						"userFiles",
+						JSON.stringify([
+							{
+								user_filename: "Previous_Conversation.txt",
+								filename: uploadedFile,
+								size: messageBuffer.length,
+							},
+						])
+					);
+				}
 				youcom_params.append("chat", JSON.stringify(userMessage));
 
 				var proxyReq = await axios({
