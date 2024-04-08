@@ -148,7 +148,7 @@ app.post("/v1/messages", (req, res) => {
 				youcom_params.append("conversationTurnId", msgid);
 				youcom_params.append("selectedAIModel", "claude_3_opus");
 				youcom_params.append("selectedChatMode", "custom");
-				youcom_params.append("pastChatLength", "0");
+				youcom_params.append("pastChatLength", userMessage.length);
 				youcom_params.append("queryTraceId", msgid);
 				youcom_params.append("use_personalization_extraction", "false");
 				youcom_params.append("domain", "youchat");
@@ -244,7 +244,6 @@ app.post("/v1/messages", (req, res) => {
 
 // handle other
 app.use((req, res, next) => {
-	console.log(req);
 	res.status(404).send("Not Found");
 });
 
