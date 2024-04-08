@@ -49,9 +49,9 @@ app.post("/v1/messages", (req, res) => {
 				let userMessage = [{ question: "", answer: "" }];
 				let userQuery = "";
 				let lastUpdate = true;
-				if(jsonBody.system) {
+				if (jsonBody.system) {
 					// 把系统消息加入messages的首条
-					jsonBody.messages.unshift({role: "system", content: jsonBody.system});
+					jsonBody.messages.unshift({ role: "system", content: jsonBody.system });
 				}
 				jsonBody.messages.forEach((msg) => {
 					if (msg.role == "system" || msg.role == "user") {
@@ -75,24 +75,20 @@ app.post("/v1/messages", (req, res) => {
 					}
 				});
 				userQuery = userMessage[userMessage.length - 1].question;
-				// if (userMessage[userMessage.length - 1].answer == "") {
-				// 	userMessage.pop();
-				// }
-				console.log(userMessage);
-
-				// 对于多条消息，只保留最后两条用户消息传入 chat，其他作为文件上传
-				if(userMessage.length > 2) {
-					lastUserMessage = userMessage.slice(-2);
-
+				
+				// 试算用户消息长度
+				if(encodeURIComponent(JSON.stringify(userMessage)).length > 32400) { 
+					//太长了，需要上传
+					
 					// user message to plaintext
-					let previousMessages = userMessage.slice(0,userMessage.length-2).map((msg) => {
-						return `user: ${msg.question}\nassistant: ${msg.answer}`;
-					})
-					.join("\n");
-
-					previousMessages= "<Previous_Conversation>\n" + previousMessages + "\n</Previous_Conversation>\n";
-
-					userMessage = lastUserMessage;
+					let previousMessages = jsonBody.messages
+						.map((msg) => {
+							return `${msg.role}: ${msg.content}`
+						})
+						.join("\n\n");
+					
+					userQuery = userMessage[userMessage.length - 1].question;
+					userMessage = [];
 
 					// GET https://you.com/api/get_nonce to get nonce
 					let nonce = await axios("https://you.com/api/get_nonce").then((res) => res.data);
@@ -134,50 +130,46 @@ app.post("/v1/messages", (req, res) => {
 				res.write(createEvent("content_block_start", { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } }));
 				res.write(createEvent("ping", { type: "ping" }));
 
-				
-
 				// proxy response
-				let youcom_params = new URLSearchParams();
-				youcom_params.append("page", "0");
-				youcom_params.append("count", "0");
-				youcom_params.append("safeSearch", "Off");
-				youcom_params.append("q", userQuery.trim());
-				youcom_params.append("incognito", "true");
-				youcom_params.append("chatId", msgid);
-				youcom_params.append("traceId", msgid);
-				youcom_params.append("conversationTurnId", msgid);
-				youcom_params.append("selectedAIModel", "claude_3_opus");
-				youcom_params.append("selectedChatMode", "custom");
-				youcom_params.append("pastChatLength", userMessage.length);
-				youcom_params.append("queryTraceId", msgid);
-				youcom_params.append("use_personalization_extraction", "false");
-				youcom_params.append("domain", "youchat");
-				youcom_params.append("responseFilter", "");
-				youcom_params.append("mkt", "zh-CN");
-				if(uploadedFile){
-					youcom_params.append(
-						"userFiles",
-						JSON.stringify([
-							{
-								user_filename: "Previous_Conversation.txt",
-								filename: uploadedFile,
-								size: messageBuffer.length,
-							},
-						])
-					);
-				}
-				youcom_params.append("chat", JSON.stringify(userMessage));
 
-				var proxyReq = await axios({
-					method: "GET",
-					url: "https://you.com/api/streamingSearch?" + youcom_params.toString(),
-					headers: {
-						accept: "text/event-stream",
-					},
-					responseType: "stream",
-				}).catch((e) => {
-					throw e;
-				});
+				var proxyReq = await axios
+					.get("https://you.com/api/streamingSearch", {
+						params: {
+							page: "0",
+							count: "0",
+							safeSearch: "Off",
+							q: userQuery.trim(),
+							incognito: "true",
+							chatId: msgid,
+							traceId: msgid,
+							conversationTurnId: msgid,
+							selectedAIModel: "claude_3_opus",
+							selectedChatMode: "custom",
+							pastChatLength: userMessage.length,
+							queryTraceId: msgid,
+							use_personalization_extraction: "false",
+							domain: "youchat",
+							responseFilter: "",
+							mkt: "zh-CN",
+							userFiles: uploadedFile
+								? JSON.stringify([
+										{
+											user_filename: "Previous_Conversation.txt",
+											filename: uploadedFile,
+											size: messageBuffer.length,
+										},
+								  ])
+								: "",
+							chat: JSON.stringify(userMessage),
+						},
+						headers: {
+							accept: "text/event-stream",
+						},
+						responseType: "stream",
+					})
+					.catch((e) => {
+						throw e;
+					});
 
 				let cachedLine = "";
 				const stream = proxyReq.data;
