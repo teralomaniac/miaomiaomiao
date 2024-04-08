@@ -83,7 +83,7 @@ app.post("/v1/messages", (req, res) => {
 					// user message to plaintext
 					let previousMessages = jsonBody.messages
 						.map((msg) => {
-							return `${msg.role}: ${msg.content}`
+							return msg.content
 						})
 						.join("\n\n");
 					
@@ -97,7 +97,7 @@ app.post("/v1/messages", (req, res) => {
 					// POST https://you.com/api/upload to upload user message
 					const form_data = new FormData();
 					var messageBuffer = Buffer.from(previousMessages, "utf8");
-					form_data.append("file", messageBuffer, { filename: "Previous_Conversation.txt", contentType: "text/plain" });
+					form_data.append("file", messageBuffer, { filename: "messages.txt", contentType: "text/plain" });
 					var uploadedFile = await axios
 						.post("https://you.com/api/upload", form_data, {
 							headers: {
@@ -154,7 +154,7 @@ app.post("/v1/messages", (req, res) => {
 							userFiles: uploadedFile
 								? JSON.stringify([
 										{
-											user_filename: "Previous_Conversation.txt",
+											user_filename: "messages.txt",
 											filename: uploadedFile,
 											size: messageBuffer.length,
 										},
