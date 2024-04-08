@@ -76,15 +76,17 @@ app.post("/v1/messages", (req, res) => {
 				// }
 				console.log(userMessage);
 
-				// 对于多条消息，只保留最后一条用户消息传入 chat，其他作为文件上传
-				if(userMessage.length > 1) {
-					lastUserMessage = [userMessage.pop()];
+				// 对于多条消息，只保留最后两条用户消息传入 chat，其他作为文件上传
+				if(userMessage.length > 2) {
+					lastUserMessage = [userMessage.slice(-2)];
 
 					// user message to plaintext
-					let previousMessages = userMessage.map((msg) => {
+					let previousMessages = userMessage.slice(0,userMessage.length-2).map((msg) => {
 						return `user: ${msg.question}\nassistant: ${msg.answer}`;
 					})
 					.join("\n");
+
+					previousMessages= "<Previous_Conversation>\n" + previousMessages + "\n</Previous_Conversation>\n";
 
 					userMessage = lastUserMessage;
 
@@ -191,7 +193,7 @@ app.post("/v1/messages", (req, res) => {
 					}
 
 					try {
-						console.log(chunk);
+						//console.log(chunk);
 						if (chunk.indexOf("event: youChatToken\n") != -1) {
 							chunk.split("\n").forEach((line) => {
 								if (line.startsWith(`data: {"youChatToken"`)) {
