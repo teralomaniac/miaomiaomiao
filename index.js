@@ -49,6 +49,10 @@ app.post("/v1/messages", (req, res) => {
 				let userMessage = [{ question: "", answer: "" }];
 				let userQuery = "";
 				let lastUpdate = true;
+				if(jsonBody.system) {
+					// 把系统消息加入messages的首条
+					jsonBody.messages.unshift({role: "system", content: jsonBody.system});
+				}
 				jsonBody.messages.forEach((msg) => {
 					if (msg.role == "system" || msg.role == "user") {
 						if (lastUpdate) {
