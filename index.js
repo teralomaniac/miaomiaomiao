@@ -71,12 +71,10 @@ app.post("/v1/messages", (req, res) => {
 					}
 				});
 				userQuery = userMessage[userMessage.length - 1].question;
-				if (userMessage[userMessage.length - 1].answer == "") {
-					userMessage.pop();
-				}
+				// if (userMessage[userMessage.length - 1].answer == "") {
+				// 	userMessage.pop();
+				// }
 				console.log(userMessage);
-
-				
 
 				// 对于多条消息，只保留最后一条用户消息传入 chat，其他作为文件上传
 				if(userMessage.length > 1) {
