@@ -76,16 +76,19 @@ app.post("/v1/messages", (req, res) => {
 				}
 				console.log(userMessage);
 
-				// user message to plaintext
-				let previousMessages = jsonBody.messages
-					.map((msg) => {
-						return `${msg.role}: ${msg.content}`;
-					})
-					.join("\n\n");
+				
 
 				// 对于多条消息，只保留最后一条用户消息传入 chat，其他作为文件上传
 				if(userMessage.length > 1) {
-					userMessage = userMessage.slice(-1);
+					lastUserMessage = [userMessage.pop()];
+
+					// user message to plaintext
+					let previousMessages = userMessage.map((msg) => {
+						return `user: ${msg.question}\nassistant: ${msg.answer}`;
+					})
+					.join("\n");
+
+					userMessage = lastUserMessage;
 
 					// GET https://you.com/api/get_nonce to get nonce
 					let nonce = await axios("https://you.com/api/get_nonce").then((res) => res.data);
