@@ -77,7 +77,7 @@ app.post("/v1/messages", (req, res) => {
 				userQuery = userMessage[userMessage.length - 1].question;
 				
 				// 试算用户消息长度
-				if(encodeURIComponent(JSON.stringify(userMessage)).length > 32400) { 
+				if(encodeURIComponent(JSON.stringify(userMessage)).length > 30000) { 
 					//太长了，需要上传
 					
 					// user message to plaintext
