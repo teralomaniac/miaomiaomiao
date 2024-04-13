@@ -2,6 +2,10 @@
 
 A proxy.
 
+**It is forbidden to use this project for profit.**
+
+**禁止用于盈利用途。**
+
 ## Usage
 
 ```bash
@@ -21,4 +25,3 @@ Only Anthropic API format is supported.
 Messages will be squashed into question: ... answer: ... format.
 
 File mode will be used when encodeURIComponent(prompt) > 32K
-
