@@ -5,9 +5,10 @@ const app = express();
 const axios = require("axios");
 const port = 8080;
 
-(axios.defaults.headers.common["User-Agent"] =
-	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
-	(axios.defaults.headers.common["Cookie"] = process.env.YOUCOM_COOKIE);
+axios.defaults.headers.common["User-Agent"] =
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+axios.defaults.headers.common["Cookie"] = process.env.YOUCOM_COOKIE;
+
 
 app.post("/v1/messages", (req, res) => {
 	req.rawBody = "";
@@ -227,6 +228,7 @@ app.post("/v1/messages", (req, res) => {
 				throw new Error("Invalid request");
 			}
 		} catch (e) {
+			console.log(e);
 			res.write(JSON.stringify({ error: e.message }));
 			res.end();
 			return;
