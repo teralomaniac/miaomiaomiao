@@ -10,9 +10,9 @@ A proxy.
 
 ## Limitations 限制
 
-Only Anthropic API format is supported.
+Only Anthropic API format is supported. The model is hardcoded Claude 3 Opus.
 
-只支持A社的API格式
+只支持A社的API格式，模型是写死了的 Claude 3 Opus
 
 Messages will be squashed into question: ... answer: ... format.
 
