@@ -1,22 +1,12 @@
 # Miaomiaomiao
 
-A proxy. [Usage 使用方法](usage.md)
+A proxy. 
+
+[**Usage 使用方法**](usage.md)
 
 **It is forbidden to use this project for profit.**
 
 **禁止用于盈利用途。**
-
-## Usage
-
-```bash
-npm install
-```
-
-then set the environment variable (see code) and 
-
-```bash
-node index
-```
 
 ## Limitations 限制
 
