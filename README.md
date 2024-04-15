@@ -6,7 +6,7 @@ A proxy.
 
 **It is forbidden to use this project for profit.**
 
-**禁止用于盈利用途。**
+**仅供个人部署用于访问自己合法取得的订阅，严禁用于转售或其他商业用途。不提供任何技术支持、不为任何违规使用导致的封号负责。**
 
 ## Limitations 限制
 
