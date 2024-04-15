@@ -1,6 +1,6 @@
 # Miaomiaomiao
 
-A proxy.
+A proxy. [usage.md](Usage)
 
 **It is forbidden to use this project for profit.**
 

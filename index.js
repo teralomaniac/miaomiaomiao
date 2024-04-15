@@ -169,7 +169,15 @@ app.post("/v1/messages", (req, res) => {
 						responseType: "stream",
 					})
 					.catch((e) => {
+						if(e.response.data) {
+							// print data
+							e.response.data.on("data", (chunk) => {
+								console.log(chunk.toString());
+							}
+							);
+						}else{
 						throw e;
+						}
 					});
 
 				let cachedLine = "";
