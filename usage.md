@@ -24,4 +24,24 @@
 
 # Usage
 
-Use Google translation. KEWL
+1. Get a YOU.COM account and subscribe.
+
+2. Open F12 (DevTools) - Console and enter `document.cookie`.
+
+3. Copy the output result (excluding the leading and trailing ' characters).
+
+4. Download or clone the project code and extract it.
+
+5. Run `npm install` (if you don't have Node.JS, go install it).
+
+6. Edit the `start.bat` file and paste the Cookie from above into it.
+
+7. Launch start.bat.
+
+8. In the ST, select Claude and fill in the reverse proxy address as http://127.0.0.1:8080/v1.
+
+9. Start using it. If it fails/no results/403/Warning, try again several times.
+
+## Notes
+
+Ensure that the exit IP used by your browser when accessing YOU.COM and the exit IP used by your proxy program are the same (simply put, if you need to use a VPN, turn it on globally). Otherwise, you will be blocked by CloudFlare and get a 403 error.
