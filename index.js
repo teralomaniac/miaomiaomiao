@@ -76,18 +76,38 @@ app.post("/v1/messages", (req, res) => {
 					}
 				});
 				userQuery = userMessage[userMessage.length - 1].question;
-				
+
+				// 获取traceId
+
+				/*let initSearch = await axios.get("https://you.com/_next/data/f3b05a38b379a189a1db48b6665e81f064fbf1b8/en-US/search.json", {
+					params: {
+						q: userQuery.trim(),
+						fromSearchBar: "true",
+						tbm: "youchat",
+						chatMode: "custom"
+					},
+					headers: {
+						"X-Nextjs-Data":"1"
+					},
+				}).then((res) => res.data);
+				if(!initSearch) throw new Error("Failed to init search");
+
+				var traceId = initSearch.pageProps.initialTraceId;*/
+
+				var traceId=uuidv4();
+
+
 				// 试算用户消息长度
 				if(encodeURIComponent(JSON.stringify(userMessage)).length > 30000) { 
 					//太长了，需要上传
-					
+
 					// user message to plaintext
 					let previousMessages = jsonBody.messages
 						.map((msg) => {
 							return msg.content
 						})
 						.join("\n\n");
-					
+
 					userQuery = userMessage[userMessage.length - 1].question;
 					userMessage = [];
 
@@ -117,7 +137,7 @@ app.post("/v1/messages", (req, res) => {
 					createEvent("message_start", {
 						type: "message_start",
 						message: {
-							id: "${msgid}",
+							id: `${traceId}`,
 							type: "message",
 							role: "assistant",
 							content: [],
@@ -136,21 +156,21 @@ app.post("/v1/messages", (req, res) => {
 				var proxyReq = await axios
 					.get("https://you.com/api/streamingSearch", {
 						params: {
-							page: "0",
-							count: "0",
+							page: "1",
+							count: "10",
 							safeSearch: "Off",
 							q: userQuery.trim(),
 							incognito: "true",
-							chatId: msgid,
-							traceId: msgid,
+							chatId: traceId,
+							traceId: `${traceId}|${msgid}|${new Date().toISOString()}`,
 							conversationTurnId: msgid,
 							selectedAIModel: "claude_3_opus",
 							selectedChatMode: "custom",
 							pastChatLength: userMessage.length,
-							queryTraceId: msgid,
+							queryTraceId: traceId,
 							use_personalization_extraction: "false",
 							domain: "youchat",
-							responseFilter: "",
+							responseFilter: "WebPages,TimeZone,Computation,RelatedSearches",
 							mkt: "zh-CN",
 							userFiles: uploadedFile
 								? JSON.stringify([
@@ -165,6 +185,7 @@ app.post("/v1/messages", (req, res) => {
 						},
 						headers: {
 							accept: "text/event-stream",
+							referer: "https://you.com/search?q=" + encodeURIComponent(userQuery.trim()) +"&fromSearchBar=true&tbm=youchat&chatMode=custom"
 						},
 						responseType: "stream",
 					})
@@ -176,7 +197,7 @@ app.post("/v1/messages", (req, res) => {
 							}
 							);
 						}else{
-						throw e;
+							throw e;
 						}
 					});
 
