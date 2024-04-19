@@ -1,6 +1,8 @@
 # Miaomiaomiao
 
-A proxy. 
+A proxy for YOU Chat.
+
+把 YOU.Com 转换为 Anthropic 格式的通用代理。
 
 [**Usage 使用方法**](usage.md)
 
